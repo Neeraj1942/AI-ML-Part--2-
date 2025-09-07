@@ -92,4 +92,62 @@ Total (Below) = 0.333 + 0.333 = 0.667
 
 ✅ Result: Chi-Square value for splitting on Performance in Class = 0.953
 
+3. Information Gain->
+Again for categorical data
+uses entropy as the major factor.
 
+formula = 1- entropy(weighted entropy)
+
+entropy = -(p)*log2(p), -> -(p1)*log2(p1) -(p2)*log2(p2) -(p3)*log2(p3)    .... -(pn)*log2(pn)
+weighted entropy = p1/(p total) * -(p1)*log2(p1) + p2/(p of total) * -(p2)*log2(p2) ..... pn/(p of total) * -(pn)*log2(pn)
+then we do 1-the value to get the Information gain.
+
+Higher the information gain -> higher the homogenity 
+incase the information gain of the parent node > child node ( child node is more homogenuos)
+
+
+
+For contiuous target variables we use->
+4. Reduction in variance :
+This method invloves entropy
+1. We calculate the entropy for the parent node and child node respectively
+2. Then we can calculate the weighted entropies
+3. Then we compare and select the one which has less entropy 
+
+less entropy = more homogenuous
+
+Reduction in variance = summation[X - Mean]^2/n
+
+example ->
+a. split in class ->
+we have to change that to numerical , that is continuous data -> plays cricket = 1, no play cricket = 0 
+Above Average (14 students)
+	•	Play = 8, Not play = 6
+	•	Prob(Play) = 0.57, Prob(Not) = 0.43
+	•	Mean = (8*1+6*0)/14 = 0.57
+	    Variance = [8*(1-0.57)^2 + 6*(0-0.57)^2]/14 = 0.245
+		
+
+Below Average (6 students)
+	•	Play = 2, Not play = 4
+	•	Prob(Play) = 0.33, Prob(Not) = 0.67
+	•	Mean = (2*1+4*0)/6 = 0.33
+	    Variance = [2*(1-0.33)^2 + 4*(0-0.33)^2]/6 = 0.222
+
+		Weighted Variance (for both the split- classes) = 14/20 * 0.245 + 6/20 * 0.222 = 0.238
+
+Class IX (10 students)
+	•	Play = 8, Not play = 2
+	•	Prob(Play) = 0.8, Prob(Not) = 0.2
+	•	Mean = (8*1+2*0)/10 = 0.8
+	    Variance = [8*(1-0.8)^2 + 2*(0-0.8)^2]/10 = 0.16
+		
+
+Class X (10 students)
+	•	Play = 2, Not play = 8
+	•	Prob(Play) = 0.2, Prob(Not) = 0.8
+	•	Mean = (2*1+8*0)/10 = 0.2
+	    Variance = [2*(1-0.2)^2 + 8*(0-0.2)^2]/10 = 0.16
+
+		Weighted Variance (for both the split- classes) = 10/20 * 0.16 + 10/20 * 0.16 = 0.16
+Now, comparing both the variance of Class Average, Class (IX,X)   -> 0.238 , 0.16 respectively so we select 0.16(Class IX,X) which is the less variance so we select this one.
