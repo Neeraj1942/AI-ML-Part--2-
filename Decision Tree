@@ -1,1 +1,101 @@
+When we split the entire data based on the features then that is a desicion tree.(split on height, split on performance, split on class)
+Both continuos variables ( height, weight .. like numberical data) and discrete/categorical data ( colour gender... more of words) can be split by using decision trees.
+Objective of decision tree - > to have pure nodes ( only one set of data with 100% accuracy)
+A pure node has 100% of only one class type(variable)
+Trminologies ->
+1. Root node         -> (entire set of data) (everything)
+2.Splitting          -> Dividing the initial root node into sub nodes
+3.Decision Node      -> the first split nodes from the root node are called decision node
+4.Leaf/Terminal Node -> Nodes which cannot be split further
+5.Branch/Sub Tree    -> a subsection of a entire decision tree
+6.Parent/child node  -> the node which splits to sub nodes is called child node , the initial node which got split up is called the parent node
+7. Dept of a tree    -> the longest path from the (Root -> Leaf )node.
+
+Selecting the best split ->
+
+1.Gini impurity = 1-gini
+
+Properties ->
+Lower the gini impurity higher the homogenous nodes(high success rate)
+Works only on categorical data (not on continuous data)
+Performs only binary splits
+
+How to apply -> 
+1. calculate the probability of a.success b.failure
+2. calculate the gini = (success)^2 + (failure)^2
+3. gini impurity = 1- gini = 1- (success)^2 + (failure)^2
+4. weighted gini impurity = (node1 items)/(total items) * gini impurity(node1) (node2 items)/(total items) * gini impurity(node2)
+
+Example -> total students =20 -> split into 2 nodes based on above average->
+Split on Performance in Class (20 students total)
+Above Average (14 students)
+	•	Play = 8, Not play = 6
+	•	Prob(Play) = 0.57, Prob(Not) = 0.43
+	•	Gini impurity = 1 − (0.57² + 0.43²) = 0.49
+
+Below Average (6 students)
+	•	Play = 2, Not play = 4
+	•	Prob(Play) = 0.33, Prob(Not) = 0.67
+	•	Gini impurity = 1 − (0.33² + 0.67²) = 0.44
+
+Weighted Gini (Performance in Class)
+(14/20)\cdot 0.49 + (6/20)\cdot 0.44 = 0.476
+Result: Parent Gini = 0.50 → After split = 0.476 (slight improvement)
+
+Finally if there is no impurity the chi square value is 1.
+Lower Gini impurity = higher homogeneity -> best split
+
+
+2. Chi Square ->
+Higher Chi-square = higher homogeneity -> best split
+
+Properties ->
+works on categorical data same like gini impurity (does not work on continuous split)
+higher the chi-square value higher the homogenuity of the nodes
+
+How to apply ->
+1. check how to parent node(root node) is split (ex -50% ,50% or so on) 
+2. the root node split is the expected split in the sub nodes
+3. calculate the actual - expected
+4. formula is root[(actual - expected)^2/expected]
+5. now add all the values of both the nodes , and the success and not success for both.
+
+Example ->
+Parent Node
+	•	Total Students = 20
+	•	Play Cricket = 10, Not Play = 10
+	•	Percentage Play = 50%
+
+1) Child Node — Above Average (14 students)
+	•	Expected Play = 14 \times 0.5 = 7
+	•	Expected Not Play = 7
+	•	Actual Play = 8, Actual Not Play = 6
+$$
+\chi^2_{\text{Play}} = \frac{(8-7)^2}{7} = \frac{1}{7} \approx 0.143
+\chi^2_{\text{Not Play}} = \frac{(6-7)^2}{7} = \frac{1}{7} \approx 0.143
+$$
+Total (Above) = 0.286
+
+⸻
+
+2) Child Node — Below Average (6 students)
+	•	Expected Play = 6 \times 0.5 = 3
+	•	Expected Not Play = 3
+	•	Actual Play = 2, Actual Not Play = 4
+$$
+\chi^2_{\text{Play}} = \frac{(2-3)^2}{3} = \frac{1}{3} \approx 0.333
+\chi^2_{\text{Not Play}} = \frac{(4-3)^2}{3} = \frac{1}{3} \approx 0.333
+$$
+Total (Below) = 0.667
+
+⸻
+
+3) Chi-Square for Split (Performance in Class)
+
+\chi^2 = 0.286 + 0.667 = 0.953
+
+⸻
+
+✅ Result: Chi-Square value for splitting on Performance in Class = 0.953
+
 
