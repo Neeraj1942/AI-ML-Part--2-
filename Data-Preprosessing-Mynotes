@@ -1,1 +1,29 @@
+#reading the Pos_Data and using parse_dates to interpret Date column as dates
+pos = pd.read_excel("POS_Data.xlsx", parse_dates=['Date'])
+pos.head()
 
+parse_dates = ['Date'] -> converts the 'date' column from strings into proper datetime64[ns] objects,
+this is used to enable pandas to read the date column as date
+example of ythis object - >
+date	       value
+2023-01-01	  100
+2023-01-02	  120
+
+pos.describe
+Explanation ->
+Row	                        Meaning
+count	        Number of non-null (non-missing) values in that column
+mean	        The average (sum of values ÷ count)
+std	          Standard deviation — how spread out the values are from the mean
+min	          The smallest value in the column
+25%	          The 25th percentile (1st quartile) — 25% of data is below this
+50%	          The median (50th percentile) — half of the data is below this
+75%	          The 75th percentile (3rd quartile) — 75% of data is below this
+max	          The largest value in the column
+
+pos.describe(include='O') -> here 'O' stands for objects, so it means include the objects also
+->
+count: Non-null values — all are present (no missing data).
+unique: Number of distinct values in the column.
+top: The most frequent (mode) value.
+freq: How many times the top value appears.
