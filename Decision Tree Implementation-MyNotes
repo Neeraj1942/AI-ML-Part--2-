@@ -1,1 +1,106 @@
+.value_counts(normalize = True) ->gives the relative frequencies (proportions) of each value.
+example - >
+import pandas as pd
+data = pd.Series(['A', 'B', 'A', 'C', 'A', 'B'])
+print(data.value_counts(normalize=True))
+
+output = 
+A    0.5
+B    0.333333
+C    0.166667
+dtype: float64
+
+Parameter	Meaning
+normalize=False (default)	-> Show raw counts (integers)
+normalize=True	          -> Show proportions (floats summing to 1)
+
+in x_train ,y_train ... = (x,y, random_state =101, stratify =y,test_size=0.25) ->
+explanation : 
+test_size=0.25	       ->  25% of the data will go to the test set
+random_state=101	     ->  Ensures reproducibility (same split every time you run the code)
+stratify=y	           ->  Ensures the class distribution in y is preserved in both train and test sets (important for classification tasks with imbalance)
+
+slicing in numpy ->
+Example ->
+import numpy as np
+
+arr = np.array([
+    [10, 20],
+    [30, 40],
+    [50, 60]
+])
+arr[1,0] -> 30 
+arr[:,0] -> [10,30,50]
+arr[:,1] -> [20,40,60]
+
+y_predict = dt_model.predict_proba(X_valid) ->
+A 2D NumPy array of shape (n_samples, n_classes)
+
+Each row contains the predicted probabilities for all classes (in our case 0's,1's classes respectively) ->(probability of getting 0, probability of getting 1)
+
+setting the thresold ->
+new_y =[]
+for i in range(len(y_pred)):
+	if y_pred[i] < 0.6:
+		new.y.append(0)
+	else :
+		new_y.append(1) 
+-> this means if the value is less than 0.6 then append 0 (takes the value as 0) , else if it is greater than= 0.6 then that value is considered 1
+
+then we use accuracy score to check if the model accuracy has imporved ->
+Code = 
+from sklearn.metrics import accuracy_score
+accuracy_score(y_valid,new_y) -> this checks the score between the actual validation set y values and the new y value where we used 0.6 as the threshold.
+accuracy_score(actual_y, predicted_y) -> is the standard format.
+
+Chaning the parameters to get better accuracy/predictions ->
+we use the depth factor and iterate it 1 to 10 and check the values at each depth value->
+in this process we score the train_accuracy , and the validation_accuracy which each iteration.
+code =
+train_accuracy =[]
+validation_accuracy =[]
+for i in depth range(1,10):
+	dt_model = decisionTreeClassifier(max_depth =depth, random_state=10)
+	dt_model.fit(X_train,Y_train)
+	train_accuracy.append(dt_model.score(X_train,y_train))
+	validation_accuracy.append(dt_model.score(X_valid,y_valid))
+
+Nest, creating data frame of the values we got in this accuracy sets ->
+frame = pd.DataFrame({'max_depth' : range(1,10),'train_acc' : train_accuracy, 'valid_acc' : validation_accuracy })
+frame.head() ->
+index     max_depth   train_acc       valid_acc
+
+
+now plotting thre gragh ->
+plt.figure(figsize=(12,6))
+plt.plot(frame['max_depth'] , frame['train_acc'] , marker = 'o') 
+plt.plot(frame['max_depth'] , frame['valid_acc'] , marker = 'o')
+plt.xlabel('Depth of the Tree')
+plt.ylabel('Accuracy/performance')
+plt.legend()
+
+note -> marker='o' tells Matplotlib to place a circle marker (o) at each data point on the line.
+
+*** How to plot decesion tree using python ->
+1. from sklearn import tree         -> This gives access to tree.export_graphviz(), which is used to export your trained decision tree to a format that Graphviz understands.
+
+2. ! pip install graphviz           -> You also need Graphviz installed on your system to run the dot command later.
+
+3. decision_tree = tree.export_graphviz(dt_model,out_file='tree.dot',feature_names=X_train.columns,max_depth=2,filled=True)
+
+4. !dot -Tpng tree.dot -o tree.png  -> Converts the .dot file into a .png image.
+
+5. image = plt.imread('tree.png')   -> Loads the PNG image into a NumPy array using matplotlib.pyplot.imread
+plt.figure(figsize=(15,15))         -> plt.figure(figsize=(15, 15)): Makes the plot large enough to read the text
+plt.imshow(image)                   -> plt.imshow(image): Displays the image (the decision tree)
+
+1.-> 
+2.-> 
+3.-> Parameter	What it does
+dt_model	The trained decision tree model (e.g., DecisionTreeClassifier)
+out_file='tree.dot'	Saves the tree in Graphviz .dot format
+feature_names=X_train.columns	Shows actual feature names instead of X[0], X[1], etc.
+max_depth=2	Limits the depth of the tree in the visualization (optional, for readability)
+filled=True	Fills the nodes with color based on class or impurity (for the colour)
+*** Result: A file named tree.dot is created.
 
