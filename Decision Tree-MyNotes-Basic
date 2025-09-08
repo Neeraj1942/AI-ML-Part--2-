@@ -151,3 +151,20 @@ Class X (10 students)
 
 		Weighted Variance (for both the split- classes) = 10/20 * 0.16 + 10/20 * 0.16 = 0.16
 Now, comparing both the variance of Class Average, Class (IX,X)   -> 0.238 , 0.16 respectively so we select 0.16(Class IX,X) which is the less variance so we select this one.
+
+Optimizing Performance of Decision Tress ->
+1. Minimum samples for node split -> ( ex number_of_samples = 10) ( for our used example)
+a. Higher values control overfitting 
+b. Too high values can cause underfitting 
+
+2. Minimum samples for terminal node -> (the node is the value given will considered, but the ones with lower values will be removed and its parent node will be considered as the terminal node)
+a. Higher value can fix overfitting
+b. Very high value can cause underfitting
+
+3.Setting the dept of the tree -> (ex - max_node =2)
+
+4. Maximum number of terminal nodes -> (will set the given number and more nodes will cause it to stop and stop the growth of the tree) ->
+it can help in overfitting
+
+Note : A decision tree trained on n samples can have at most 'n' terminal nodes — one for each sample — if allowed to grow without any stopping criteria.
+
