@@ -1,0 +1,25 @@
+Data Preparation ->
+1.Data Division         -> splitting into test and train data
+2.Data Cleaning         -> a. Removing invalid values, b.Imputing missing vales, c.Treating outliers
+3.Data Reconstruction   -> converting data from one format to another
+4.Data Transformation   -> combining data from multiple sources to easily analyze and work it
+5.Feature Engineering   -> a.creating new features by combining existing ones, b. required domain knowledge
+
+Modelling -> uses different machine learning algorithms and train the prepared dataset
+mainly 3 types ->
+a. Classification model
+b. Regression model
+c. Unsupervised machine learning model
+
+Model Evaluation -> we measure the models correctness using the eavaluation metrics ->
+a. Mean squared error 
+b. Root mean squared error 
+c. Accuracy 
+d. Precision
+e. Recall
+to check the model realibility on the models unseen data(eg - test data)
+
+Model Deployment ->
+this steps involves the trained and evaluated model is deployed or integrated into eco-system (server , web-aplication, app)
+
+Feed back loop -> to ensure the model is working fine checking it regularly.
