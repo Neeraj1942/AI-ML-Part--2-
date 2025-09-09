@@ -27,3 +27,321 @@ count: Non-null values — all are present (no missing data).
 unique: Number of distinct values in the column.
 top: The most frequent (mode) value.
 freq: How many times the top value appears.
+
+code ->
+pos['weekday'] = pos['Date'].dt.dayofweek
+pos['weekday'].value_counts() 
+->.dt is an accessor for datetime-like values in a datetime64
+
+this is used to extract the dates of a week->
+pos['Date'].dt.dayofweek -> return integer 0 for monday to 6 for sunday respectively
+pos['weekday'].value_counts() -> It counts how many times each weekday appears in the weekday column of your pos DataFrame.
+output -> 
+weekday
+5    31185
+Name: count, dtype: int64
+-> which means '5' means saturday, 31185 rows in total
+
+product['weekend_date'] = product['Date'].apply(lambda x:x+datetime.timedelta((calendar.SATURDAY-x.weekday()) % 7 ))
+x.weekday()
+
+Returns the weekday of date x (0 = Monday, 6 = Sunday)
+🔹 calendar.SATURDAY
+This is a constant = 5
+(i.e., calendar.SATURDAY == 5)
+
+🔹 (calendar.SATURDAY - x.weekday()) % 7
+Calculates how many days ahead Saturday is from the current date x
+% 7 ensures the result is always between 0–6 (never negative)
+
+Examples:
+If x is Friday (4) → 5 - 4 = 1 → add 1 day
+If x is Saturday (5) → 5 - 5 = 0 → add 0 days
+If x is Sunday (6) → 5 - 6 = -1 % 7 = 6 → add 6 days (next Saturday) -> important logic (5-6)%7 -> -1 = 7 × (-1) + 6 -> so 6 is the remainder
+
+🔹 datetime.timedelta(...)
+Creates a time shift (number of days) that you can add to a date
+
+🔹 .apply(lambda x: ...)
+Applies this logic to each row in the 'Date' column
+
+#grouping the product data, first by 'weekend_date' and then by 'SKU_ID' and taking the maximum value for each week and SKU ID for all columns in col
+product_agg = product.groupby(['weekend_date','SKU_ID'])[cols].max().reset_index() ->
+
+1.product.groupby(['weekend_date', 'SKU_ID']) -> weekend_date (which represents the Saturday of the week for each record) , SKU_ID (the product identifier), all rows for the same SKU in the same week are grouped together.
+2.[cols]                                      -> Here cols is a list of columns you want to aggregate
+3..max()                                      -> For each group (i.e., each SKU and week pair), it takes the maximum value of each column listed in cols
+4..reset_index()                              -> The groupby operation creates a multi-index using weekend_date and SKU_ID
+                                              -> Calling reset_index() converts these index levels back into columns so that the resulting DataFrame is easier to work with and read.
+
+simple example for the above implementation ->
+Product	Region	Sales
+A	East	100
+A	West	150
+B	East	200
+B	West	250
+C	East	300
+C	West	350
+
+df.groupby(['Product', 'Region'])['Sales'].sum().reset_index() ->
+| Product | Region | Sales |
+| ------- | ------ | ----- |
+| A       | East   | 100   |
+| A       | West   | 150   |
+| B       | East   | 200   |
+| B       | West   | 250   |
+| C       | East   | 300   |
+
+df.groupby(['Product', 'Region'])['Sales'].sum() ->
+Product  Region
+A        East      100
+         West      150
+B        East      200
+         West      250
+Name: Sales, dtype: int64
+
+so we are just grouping by 2 factors(product,region) on the sales to sum up ------
+
+Mergin the 2 data frames ->
+#merging the product data and pos data
+data = pd.merge(pos, product_agg, how='left', left_on=['Date','SKU_ID'],right_on=['weekend_date','SKU_ID'])
+
+Standard function ---
+pd.merge(left, right, how='inner', on=None, left_on=None, right_on=None, ...) ->
+
+left / right	                      The two DataFrames you want to merge
+how	                                Type of merge: 'inner', 'left', 'right', 'outer'
+on	                                Column(s) common to both DataFrames to merge on (must have same name)
+left_on / right_on	                If the columns to join on are not named the same, specify separately
+left_index / right_index	          Set to True if you want to join using the index
+suffixes	                          Add suffixes to overlapping columns from left/right DataFrames
+indicator	                          Adds a column showing which DataFrame each row came from
+
+'inner'	        Only matching rows	INNER JOIN
+'left'	        All rows from left, match from right	LEFT JOIN
+'right'	        All rows from right, match from left	RIGHT JOIN
+'outer'        	All rows from both, fill missing with NaN	FULL OUTER JOIN
+
+
+#creating sets for SKU_IDs for both the data and search dataframe
+data_set = set(data.SKU_ID.values)
+search_set = set(search.SKU_ID.values)
+
+comverts the data.SKU_ID , and search.SKU_ID to numpy array -> example : array(['SKU1001', 'SKU1002', 'SKU1001', 'SKU1003', ...])
+
+data_set - data_set.intersection(search_set) -> tell us what SKU_ID's are missing from data - search (data)
+
+data = pd.merge(data, search, how='left',on=['Date','SKU_ID']) -> on means both the columns ['date', 'SKU_ID'] is same in both the columns
+
+df['Page_traffic'].corr(df['Units_sold']) ->
+here we used corr() function -> Pearson correlation coefficient
+
+Value	        Meaning
++1	       Perfect positive correlation
+0	         No correlation
+-1	       Perfect negative correlation
+
+data_focus.describe().transpose() -> 
+transpose() -> just makes the rows->columns and vice versa for better picture about the data
+
+Treating the missing values ->
+1. Deleting the columns if majority of the values are missing
+2. Deleting the rows or observation with missing values
+3. Imputing the missing values with mean, median or mode or relavent values
+4. Imputing with the previous or next value
+
+.isnull() and .isna() ->
+Method	      Identical to	      Purpose
+.isnull()	    .isna()	           Detect NaN/null
+.notnull()   	.notna()	        Detect non-missing
+
+when a = [(all the individual SKU_ID which are null)] (ex - 27)
+
+for i in a:
+    print (data_focus[data_focus['SKU_ID']==i]['Unit_price'].isnull().sum()
+           /data_focus[data_focus['SKU_ID']==i].shape[0])
+this loop over (0 to 27) where the SKU_ID is the number between the loop, then check if the value isnull() then sum( sum of all true values) unique SKU_ID/ the number of rows the unique SKU_ID is present in
+
+Output : 1.0 -> means all the SKU_ID in the loop of 0 to a are null.
+
+For an ouput understanding the grouby()[] and grouby()[].transform()
+example ->
+Product	    Sales
+A	          10
+A	          20
+B	          5
+B	          15
+C	          8
+
+data.groupby('Product')['Sales'].mean()
+output ->
+Product	  Sales
+A	        15.0
+B	        10.0
+C	        8.0
+
+data['Product_Avg_Sales'] = data.groupby('Product')['Sales'].transform('mean')
+output ->
+Product	        Sales	            Product_Avg_Sales
+A	              10	              15.0
+A	              20	              15.0
+B	              5	                10.0
+B	              15	              10.0
+C	              8	                 8.0
+
+
+another example ->
+| Product | Sales |
+| ------- | ----- |
+| A       | 10    |
+| A       | NaN   |
+| A       | 20    |
+| B       | 5     |
+| B       | 15    |
+| B       | NaN   |
+| C       | NaN   |
+| C       | 8     |
+
+data['Product_Avg_Sales'] = data.groupby('Product')['Sales'].transform(lambda x: x.fillna(x.median()))
+| Product | Sales | Product\_Avg\_Sales |
+| ------- | ----- | ------------------- |
+| A       | 10.0  | 10.0                |
+| A       | NaN   | 15.0                |
+| A       | 20.0  | 20.0                |
+| B       | 5.0   | 5.0                 |
+| B       | 15.0  | 15.0                |
+| B       | NaN   | 10.0                |
+| C       | NaN   | 8.0                 |
+| C       | 8.0   | 8.0                 |
+
+data_focus['Unit_price'] = data_focus.groupby('Segment')['Unit_price'].transform(lambda x: x.fillna(x.median()))
+that mean the whole table remains same only the assinged column(Unit_Price) ->
+stores the new values and replaces the null values with the median of the segments types accordingly
+
+forward filling (ffill()) -> When you have data over time (e.g., daily sales, prices), sometimes values might be missing for certain dates. Forward filling uses the last known value to fill in these gaps, making the data more complete and consistent
+example ->
+| index | SKU\_ID | Date       | Unit\_price | Revenue |
+| ----- | ------- | ---------- | ----------- | ------- |
+| 0     | A       | 2021-01-01 | 10          | 100     |
+| 1     | A       | 2021-01-02 | NaN         | NaN     |
+| 2     | A       | 2021-01-03 | NaN         | 120     |
+| 3     | B       | 2021-01-01 | NaN         | 50      |
+| 4     | B       | 2021-01-02 | 15          | NaN     |
+| 5     | B       | 2021-01-03 | NaN         | NaN     |
+
+ffill() ->
+| index | SKU\_ID | Date       | Unit\_price | Revenue |
+| ----- | ------- | ---------- | ----------- | ------- |
+| 0     | A       | 2021-01-01 | 10          | 100     |
+| 1     | A       | 2021-01-02 | 10          | 100     |
+| 2     | A       | 2021-01-03 | 10          | 120     |
+| 3     | B       | 2021-01-01 | NaN         | 50      |
+| 4     | B       | 2021-01-02 | 15          | 50      |
+| 5     | B       | 2021-01-03 | 15          | 50      |
+
+how it works - >
+| index | Unit\_price | Revenue   |
+| ----- | ----------- | --------- |
+| 0     | 10          | 100       |
+| 1     | NaN → 10    | NaN → 100 |
+| 2     | NaN → 10    | 120       |
+
+| index | Unit\_price | Revenue  |                                        |
+| ----- | ----------- | -------- | -------------------------------------- |
+| 3     | NaN         | 50       | (No previous Unit\_price, remains NaN) |
+| 4     | 15          | NaN → 50 |                                        |
+| 5     | NaN → 15    | NaN → 50 |                                        |
+
+
+columns_to_fill = ['1_Star_Rating', '2_Star_Rating', '3_Star_Rating', '4_Star_Rating', '5_Star_Rating']
+
+#apply the backfill operation within each SKU_ID group for the specified columns
+data_focus[columns_to_fill] = data_focus.groupby('SKU_ID')[columns_to_fill].apply(lambda group: group.ffill()).reset_index(level=0, drop=True)
+
+.apply() on a grouped DataFrame runs your function separately on each group.
+This lets you perform group-wise operations like forward-filling missing data without mixing data from different groups.
+
+.apply() with groupby adds the group key(s) to the index.
+.reset_index(level=0, drop=True) removes that group key index level so you get back the original flat index.
+
+example with and without .reset_index(level =0,drop=True) -> 
+
+without using we get multiframe which can be put back ->
+SKU_ID    
+A       0     NaN
+        1     1.0
+        2     1.0
+B       3     NaN
+        4     2.0
+        5     2.0
+Name: 1_Star_Rating, dtype: float64
+
+but while using this we get single frame with the same output (table remains same)->
+  SKU_ID  1_Star_Rating
+0      A            NaN
+1      A            1.0
+2      A            1.0
+3      B            NaN
+4      B            2.0
+5      B            2.0
+
+Parameter	Meaning
+level=0	Reset only the first level of the multi-index (i.e., the SKU_ID in groupby('SKU_ID'))
+drop=True	Don't keep that index as a new column, just remove it
+inplace=True	Apply changes in-place to the object (only works on DataFrames, not Series returned by apply)
+
+we use apply() -> for multiple cols because more manual and streamlined.  ( we use reset_index(level = 0, inplace =True) 
+we use transform() -> for single , because for multiple cols it raises error is more automated. (we do not use reset_index)
+
+#apply the backfill operation within each SKU_ID group for the specified columns
+data_focus[columns_to_fill] = data_focus.groupby('SKU_ID')[columns_to_fill].apply(lambda group: group.ffill()).reset_index(level=0, drop=True)
+
+now the difference between 1(.reset_index())  and 2.(reset_index(inplace =True)  and 3(.reset_index(level=0,inplace=True))->
+
+
+|   | SKU\_ID | Date       | Sales | Units\_sold |
+| - | ------- | ---------- | ----- | ----------- |
+| 0 | SKU1011 | 2021-01-02 | 100   | 10          |
+| 1 | SKU1011 | 2021-01-09 | 150   | 15          |
+| 2 | SKU1012 | 2021-01-02 | 200   | 20          |
+| 3 | SKU1012 | 2021-01-09 | 250   | 25          |
+
+1.
+|   | SKU\_ID | Sales | Units\_sold |
+| - | ------- | ----- | ----------- |
+| 0 | SKU1011 | 250   | 25          |
+| 1 | SKU1012 | 450   | 45          |
+
+2.
+|   | SKU\_ID | Sales | Units\_sold |
+| - | ------- | ----- | ----------- |
+| 0 | SKU1011 | 250   | 25          |
+| 1 | SKU1012 | 450   | 45          |
+
+3.
+| SKU\_ID | Date       | Sales | Units\_sold |
+| ------- | ---------- | ----- | ----------- |
+| SKU1011 | 2021-01-02 | 100   | 10          |
+| SKU1011 | 2021-01-09 | 150   | 15          |
+| SKU1012 | 2021-01-02 | 200   | 20          |
+| SKU1012 | 2021-01-09 | 250   | 25          |
+
+1,2, are same but inplace =True just updates the datag=frame directly without creating an object.
+
+
+to fill the missing values with 0 ->
+#fill the remaining null values in the rating columns with 0
+data_focus[columns_to_fill] = data_focus[columns_to_fill].fillna(0)
+
+columns_to_fill_with_median = ['Image_Count', 'Bullet_Count', 'Title_Count', 'Description_Length']
+
+for col in columns_to_fill_with_median:
+    data_focus[col] = data_focus.groupby('SKU_ID')[col].transform(lambda x: x.fillna(x.median()))
+this helps to find the median of each group and replace them with that values.(group wise for each median of each column)
+
+data_focus[columns_to_fill_with_median] = data_focus[columns_to_fill_with_median].fillna(data_focus[columns_to_fill_with_median].median())
+-> this line helps to fill all the missing values all with the median of all the columns together, imputing them
+->Calculates the median of each column across the entire dataset (ignoring groups).
+  Fills all missing values in those columns with the same global median value for each column.
+
+
