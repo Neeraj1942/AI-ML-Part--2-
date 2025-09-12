@@ -1,0 +1,42 @@
+Outliers - >
+The data points which are statistically far from other data points.
+2 aproaches ->
+1.Visual Approach     -> Box plot, Histogram, Scatter Plot
+2.Statistical Aproach -> Z-score, IQR(Inter Quartile Range)
+
+Box plot      -> Displays outliers as points beyond the whiskers, typically outside 1.5×IQR from the quartiles
+Histogram     -> Reveals outliers as bars isolated far from the main data distribution.
+Scatter Plot  -> Shows outliers as points far from the cluster or trend of the other data points
+
+Z-score       -> Flags data points whose standardized value is beyond a threshold (usually > 3 or < -3)
+IQR           -> Identifies outliers as values below Q1 − 1.5×IQR or above Q3 + 1.5×IQR ( similar to box plots)
+
+Treating the outliers ->
+1.Remove: Delete rows containing outliers to prevent them from skewing analysis.
+2.Replace with Mean/Median: Substitute outliers with the column's mean or median to preserve dataset size.
+3.Cap (Winsorization): Limit extreme values to a specified percentile range (e.g., 5th and 95th).
+4.Transform: Apply mathematical transformations (e.g., log, sqrt) to compress the effect of extreme values.
+5.Bin: Group values into intervals or categories to reduce the impact of outliers.
+6.Model-based Handling: Use robust models (e.g., tree-based algorithms) that are less sensitive to outliers.
+
+Code ->
+Unsupervised->
+Crearing a path then,
+data_focus.to_csv(file_path, index=False)  -> index = false means to index to the given data.
+
+Supervised model ->
+data_final = data_focus.sample(frac = 1, random_state=1) ->
+frac=1: Means take 100% of the rows from data_focus — basically, shuffle all rows.
+random_state=1: Sets the seed for the random number generator to make the shuffle reproducible (same shuffle every time you run it).
+
+#creating the variable for classification model
+data_final['Units_sold>1000'] = (data_final.Units_sold > 1000)*1 -> makes a new column 'Units_sold>1000' to store if the units sold>1000,
+If yes -> 1
+If no  -> 0 
+
+1. We are removing the 'Date' column since we are not looking to derive any time related insights from the data.
+2. 'Revenue' is already a part of Units_sold (Units_sold = Revenue/Unit_price). So we can remove 'Revenue($)'.
+3. "SKU_ID' is nothing but the identity of the product. Theere is no information in this column that our model can extract. 
+
+Then we create 2 types -> one with date for feature engineering data_fe, and other without date for other models called data_final.
+
