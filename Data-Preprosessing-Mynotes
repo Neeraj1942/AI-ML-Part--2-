@@ -345,3 +345,28 @@ data_focus[columns_to_fill_with_median] = data_focus[columns_to_fill_with_median
   Fills all missing values in those columns with the same global median value for each column.
 
 
+Treating the Missing values - Part 2  ->
+
+1. For the 'organic search rank' column -> we use SKU_ID first to forward fill, then we use the segment to fill the median of the segment later to get a 0 null values.
+
+2. For 'num_unique_search_value' -> we just fill all by 0 because there no unique search happening here.
+
+3. For 'Sum of Spend' and 'Num_of_Promotions' columns we use -> we just fill all by 0 because there no sum spend on that week and Number of promotions done.
+
+4. For 'Online_Clicks' and 'Online_Cost' and 'Online_Impressions' and 'num_unique_campaigns' ->
+we fill them with zero beacuse all these aspects have 0 value in that particular week respectively.
+
+5.  ->
+Clicks_video                    12550
+Cost_video                      12550
+Impressions_video               12550
+num_unique_campaigns_offline    12550
+
+they are all related to offile marketing we fill them with 0 too.
+
+code -> data_focus.fillna(0, inplace=True)  
+-> this replaces all the rest nan values with 0 and keep them in place using 'inplace = true'
+
+
+
+
